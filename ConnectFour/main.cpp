@@ -17,10 +17,10 @@ int main()
 
 	// Luo sellaiset pelaajat kuin haluat (esim. AI tai ihminen).
 	// HUOM! Oma_AI tulee toteuttaa ensin!
-//	C4_AI *red				= new Oma_AI();
-	C4_AI *blue				= new Oma_AI();
-	C4_AI *red				= new Human();
-	//C4_AI *blue				= new Human();
+	C4_AI *red				= new Oma_AI();
+//	C4_AI *blue				= new Oma_AI();
+	//C4_AI *red				= new Human();
+	C4_AI *blue				= new Human();
 
 	// Punainen aloittaa.
 	C4_AI *active_player	= red;

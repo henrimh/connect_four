@@ -33,14 +33,121 @@ public:
 	//Toteuta omassa aliluokassa
 	virtual Move select_best_move()
 	{
-		//lista laillisista siirroista 
+		int max, min;
+		int evaluationTable[ROWS][COLUMNS] = 
+		{ { 3, 4, 5, 7, 5, 4, 3 },
+		{ 4, 6, 8, 10, 8, 6, 4 },
+		{ 5, 8, 11, 13, 11, 8, 5 },
+		{ 5, 8, 11, 13, 11, 8, 5 },
+		{ 4, 6, 8, 10, 8, 6, 4 },
+		{ 3, 4, 5, 7, 5, 4, 3 } };
+
+		// RED (1), BLUE (-1)
+		// Katsotaan t‰ss‰ ett‰ kumpi ollaan itse
+		if (_to_move == RED)
+		{
+			max = 1;
+			min = -1;
+		}
+		else //BLUE
+		{
+			max = -1;
+			min = 1;
+		}
+
 		Move legal_moves[COLUMNS];
 		int nof_moves = gen_moves(legal_moves);
 
-		//palauta 0-6 numero, joka on se mihin pudotetaan nappula.
-		int r = rand() % nof_moves;
+		int i = 0, j = 0;
+		int depth = 0, maxDepth = 3;
+		int bestMoveSum = -1000000;
+		int moveValueSum = 0;
+		int bestMove;
 
-		return legal_moves[r];
+		while (nof_moves > i) 
+		{
+			//Tehd‰‰n liike ensimm‰iseen vapaaseen paikkaan
+			make_move(legal_moves[i]);
+
+			//Jos paikkaan siirt‰m‰ll‰ voittaa, niin palautellaan se suoraan
+			if (check_result() == max)
+			{
+				undo_move(i);
+				return i;
+			}
+			// Jos paikkaan siirt‰m‰ll‰ kumpikaan pelaaja ei voita, niin ruvetaan
+			// k‰ym‰‰n min maxia l‰pi.
+			else if (check_result() == 0)
+			{
+				Move test_moves[COLUMNS];
+				int nof_possible_moves = gen_moves(test_moves);
+
+				while (depth < maxDepth)
+				{
+					if (_to_move == RED)
+					{
+						max = 1;
+						min = -1;
+					}
+					else //BLUE
+					{
+						max = -1;
+						min = 1;
+					}
+
+					make_move(test_moves[j]);
+					if (check_result() == max)
+					{
+						if (_to_move == RED)
+						{
+							bestMove = j;
+						}
+						moveValueSum += max * 1000;
+						j++;
+					}
+					else if (check_result() == 0)
+					{
+						depth++;
+
+						if (depth == maxDepth)
+						{
+							j++;
+							for (int a = 6; a > -1; a--)
+							{
+								if (_board[a][j] != 0)
+									moveValueSum += evaluationTable[a][j];								
+							}
+						}
+					}
+					else if (check_result() == min)
+					{
+						if (_to_move == BLUE)
+						{
+							bestMove = j;
+						}
+						moveValueSum += min * 1000;
+						j++;
+					}
+					if (depth == maxDepth)
+						break;
+				}
+			}
+
+			for (int madeMoves = j; madeMoves > 0; madeMoves--)
+			{
+				undo_move(madeMoves);
+			}
+
+			if (bestMoveSum < moveValueSum)
+			{
+				bestMoveSum = moveValueSum;
+				bestMove = i;
+			}
+			i++;
+		}
+
+		//palauta 0-6 numero, joka on se mihin pudotetaan nappula.
+		return bestMove;
 
 	}
 
@@ -48,7 +155,7 @@ public:
 	//Toteuta omassa aliluokassa
 	void get_AI_name(std::string &name) const
 	{
-		name = "Human Player";
+		name = "EzWin";
 	}
 
 };
